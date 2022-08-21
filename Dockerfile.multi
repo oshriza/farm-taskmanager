@@ -1,0 +1,16 @@
+FROM alpine:3.11 AS build-stage
+WORKDIR /app
+
+# add packages to the images
+RUN apk add nodejs && apk add npm
+
+
+# copy the nexccery content from the local file to the image
+COPY frontend/ .
+
+
+# install npm packages
+RUN npm install && npm run build
+
+FROM nginx:alpine
+COPY --from=build-stage /app/build/ /usr/share/nginx/html/
