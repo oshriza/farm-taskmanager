@@ -9,8 +9,8 @@ services:
     depends_on:
       - mongodb
     restart: always
-    volumes:
-      - /home/oshri/Desktop/Develeap/temp/FARM-Stack-Course/backend:/app/
+    # volumes:
+    #   - /home/oshri/Desktop/Develeap/temp/FARM-Stack-Course/backend:/app/
   
   # frontend:
   #   build:
