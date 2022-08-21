@@ -13,22 +13,35 @@ function App() {
   const [todoList, setTodoList] = useState([{}])
   const [title, setTitle] = useState('') 
   const [desc, setDesc] = useState('')
-  
-    
 
   // Read all todos
   useEffect(() => {
-    axios.get('http://localhost:8000/api/todo')
+    axios.get('/api/todo')
       .then(res => {
         setTodoList(res.data)
       })
-  });
+  }, []);
 
   // Post a todo
   const addTodoHandler = () => {
-    axios.post('http://localhost:8000/api/todo/', { 'title': title, 'description': desc })
+    if( title !== "") {
+      axios.post('/api/todo/', { 'title': title, 'description': desc })
       .then(res => console.log(res))
-};
+    } else {
+      alert("Please provide a title!")
+    }
+    window.location.reload();
+  };
+
+  const updateDescription = () => {
+    if( title !== "") {
+      axios.put(`/api/todo/${title}/?desc=${desc}`)
+      .then(res => console.log(res))
+    } else {
+      alert("Please provide a title!")
+    }
+    window.location.reload();
+  };
 
   return (
     <div className="App list-group-item  justify-content-center align-items-center mx-auto" style={{"width":"400px", "backgroundColor":"white", "marginTop":"15px"}} >
@@ -40,6 +53,7 @@ function App() {
         <input className="mb-2 form-control titleIn" onChange={event => setTitle(event.target.value)} placeholder='Title'/> 
         <input className="mb-2 form-control desIn" onChange={event => setDesc(event.target.value)}   placeholder='Description'/>
       <button className="btn btn-outline-primary mx-2 mb-3" style={{'borderRadius':'50px',"font-weight":"bold"}}  onClick={addTodoHandler}>Add Task</button>
+      <button className="btn btn-outline-primary mx-2 mb-3" style={{'borderRadius':'50px',"font-weight":"bold"}}  onClick={updateDescription}>Update Description</button>
       </span>
       <h5 className="card text-white bg-dark mb-3">Your Tasks</h5>
       <div >
