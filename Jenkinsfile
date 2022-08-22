@@ -15,12 +15,12 @@ pipeline {
         BRANCH_NAME = "${env.GIT_BRANCH}" // Release/1.1
         AWS_ACCOUNT_ID="644435390668"
         AWS_DEFAULT_REGION="us-east-2"
-        IMAGE_TAG="1.0.0"
         IMAGE_REPO_NAME_BACKEND="oshri-portfolio-back"
         REPOSITORY_URI_BACKEND="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_BACKEND}"
         IMAGE_REPO_NAME_FRONTEND="oshri-portfolio-front"
         REPOSITORY_URI_FRONTEND="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_FRONTEND}"
         COMMIT_MSG=sh(script: 'git log -1 | grep "#test"' , returnStatus: true)
+        // IMAGE_TAG="1.0.0"
     }
     stages {
         stage ("checkout") {
@@ -54,6 +54,18 @@ pipeline {
                 echo "Publish to ECR..."
                 script {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws.credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                            IMAGE_TAG = sh(script: "aws ecr describe-images --output json --repository-name oshri-portfolio-back --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[-1]' | jq . --raw-output | sort -r", returnStdout: true) 
+                            echo "Last image tag: ${IMAGE_TAG}"
+                            if (IMAGE_TAG.isEmpty()) {
+                                IMAGE_TAG = "1.0.0"
+                            }
+                            else { // 1.1.1
+                                (major, minor, patch) = IMAGE_TAG.tokenize(".") // [1,1,1]
+                                patch = patch.toInteger() + 1 // 2
+                                echo "Increment to ${patch}"
+                                IMAGE_TAG = "${major}.${minor}.${patch}" // 1.1.2
+                                echo "the next tag for Release is: ${IMAGE_TAG}"
+                            }
                             sh "aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 644435390668.dkr.ecr.us-east-2.amazonaws.com"
                             sh "docker tag ${IMAGE_REPO_NAME_BACKEND}:latest ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
                             sh "docker push ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
@@ -108,6 +120,8 @@ pipeline {
                 echo "Deleting and clean workspace..."
                 sh "docker rmi -f ${IMAGE_REPO_NAME_FRONTEND}:${IMAGE_TAG}"
                 sh "docker rmi -f ${IMAGE_REPO_NAME_BACKEND}:${IMAGE_TAG}"
+                sh "docker rmi -f ${IMAGE_REPO_NAME_FRONTEND}:latest"
+                sh "docker rmi -f ${IMAGE_REPO_NAME_BACKEND}:latest"
                 cleanWs()
             }
             failure {
