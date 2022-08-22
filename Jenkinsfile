@@ -11,12 +11,14 @@ pipeline {
     agent any
 
     environment {
+        REPO = "${env.GIT_URL}"
+        BRANCH_NAME = "${env.GIT_BRANCH}" // Release/1.1
         AWS_ACCOUNT_ID="644435390668"
         AWS_DEFAULT_REGION="us-east-2"
         IMAGE_TAG="latest"
-        IMAGE_REPO_NAME_APP="oshri-ted-search-app"
+        IMAGE_REPO_NAME_APP="oshri-portfolio-back"
         REPOSITORY_URI_APP="https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_APP}"
-        IMAGE_REPO_NAME_NGINX="oshri-ted-search-nginx"
+        IMAGE_REPO_NAME_NGINX="oshri-portfolio-front"
         REPOSITORY_URI_NGINX="https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_NGINX}"
         COMMIT_MSG=sh(script: 'git log -1 | grep "#test"' , returnStatus: true)
     }
@@ -27,23 +29,22 @@ pipeline {
                 checkout scm
             }
         }
-        // stage ("build-test") {
-        //     steps {
-        //         echo 'BUILD...'
-        //         sh "mvn clean verify"
-        //         sh "docker build -t ${IMAGE_REPO_NAME_NGINX} -f Dockerfile.nginx ."
-        //     }
-        // }
+        stage ("build") {
+            // when { expression {BRANCH_NAME ==~ /Release(.+)/ || BRANCH_NAME ==~ /feature(.+)/}}
+            steps {
+                echo 'BUILD...'
+                sh "docker-compose build"
+            }
+        }
 
-        // // stage ("E2E") {
-        // //     steps {
-        // //         echo 'TEST...'
-        // //         sh "docker run -d --name app --network jenkins_workspace --network-alias=app ${IMAGE_REPO_NAME_APP}:1.1-SNAPSHOT"
-        // //         sh "docker run -d -p 3000:80 --name ted-nginx --network jenkins_workspace --network-alias=tednginx ${IMAGE_REPO_NAME_NGINX}"
-        // //         sh "sleep 5"
-        // //         sh "e2e/test.sh tednginx:80"
-        // //     }
-        // // }
+        stage ("test") {
+            steps {
+                echo 'TEST...'
+                sh "docker-compose up"
+                sh "sleep 10"
+                sh "e2e/test.sh front:80"
+            }
+        }
         
         // stage ("publish") {
         //     when { expression {COMMIT_MSG == "0"}}
@@ -96,10 +97,10 @@ pipeline {
         post {
             always {
                 echo "Deleting containers..."
-                sh "docker rm -f app"
-                sh "docker rm -f ted-nginx"
+                // sh "docker rm -f app"
+                // sh "docker rm -f ted-nginx"
                 sh "docker rmi -f ${IMAGE_REPO_NAME_NGINX}:${IMAGE_TAG}"
-                sh "docker rmi -f ${IMAGE_REPO_NAME_APP}:1.1-SNAPSHOT"
+                sh "docker rmi -f ${IMAGE_REPO_NAME_APP}:${IMAGE_TAG}"
                 cleanWs()
             }
             failure {
