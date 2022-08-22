@@ -4,44 +4,44 @@ services:
     build: .
     hostname: app
     container_name: app_container
-    # ports:
-    #   - 8000:8000
+    ports:
+      - 8000:8000
     depends_on:
       - mongodb
     restart: always
     # volumes:
     #   - /home/oshri/Desktop/Develeap/temp/FARM-Stack-Course/backend:/app/
   
-  # frontend:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.frontend
-  #   hostname: frontend
-  #   container_name: frontend_container
-  #   ports:
-  #     - 3000:3000
-  #   restart: always
-  #   # volumes:
-  #   #   - /home/oshri/Desktop/Develeap/temp/FARM-Stack-Course/frontend:/app/
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    hostname: frontend
+    container_name: frontend_container
+    ports:
+      - 3000:3000
+    restart: always
+    # volumes:
+    #   - /home/oshri/Desktop/Develeap/temp/FARM-Stack-Course/frontend:/app/
 
   mongodb:
     hostname: mongodb
     container_name: mongodb_container
     image: bitnami/mongodb
-    # ports:
-    #   - "27017:27017"
+    ports:
+      - "27017:27017"
     restart: always
 
-  nginx:
-    hostname: nginx
-    container_name: nginx_container
-    build:
-      context: .
-      dockerfile: Dockerfile.multi
-    restart: always
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      # - ./flask-app/templates/index.html:/usr/share/nginx/html/index.html
-      # - ./flask-app/static/:/usr/share/nginx/html/static
-    ports:
-      - 80:80
+  # nginx:
+  #   hostname: nginx
+  #   container_name: nginx_container
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.multi
+  #   restart: always
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+  #     # - ./flask-app/templates/index.html:/usr/share/nginx/html/index.html
+  #     # - ./flask-app/static/:/usr/share/nginx/html/static
+  #   ports:
+  #     - 80:80

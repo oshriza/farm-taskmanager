@@ -9,3 +9,11 @@ uvicorn == 0.14.0
 
 # Motor is a full-featured, non-blocking IO MongoDB driver for Python 
 motor == 2.4.0
+
+# To handle all requests - espically when making tests
+
+requests == 2.28.1
+
+# To check tets cases
+
+pytest == 7.1.2
