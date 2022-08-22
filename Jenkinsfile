@@ -17,9 +17,9 @@ pipeline {
         AWS_DEFAULT_REGION="us-east-2"
         IMAGE_TAG="1.0.0"
         IMAGE_REPO_NAME_BACKEND="oshri-portfolio-back"
-        REPOSITORY_URI_BACKEND="https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_BACKEND}"
+        REPOSITORY_URI_BACKEND="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_BACKEND}"
         IMAGE_REPO_NAME_FRONTEND="oshri-portfolio-front"
-        REPOSITORY_URI_FRONTEND="https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_FRONTEND}"
+        REPOSITORY_URI_FRONTEND="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_FRONTEND}"
         COMMIT_MSG=sh(script: 'git log -1 | grep "#test"' , returnStatus: true)
     }
     stages {
@@ -54,6 +54,7 @@ pipeline {
                 echo "Publish to ECR..."
                 script {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws.credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                            sh "aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 644435390668.dkr.ecr.us-east-2.amazonaws.com"
                             sh "docker tag ${IMAGE_REPO_NAME_BACKEND}:latest ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
                             sh "docker push ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
 
@@ -105,18 +106,19 @@ pipeline {
         post {
             always {
                 echo "Deleting and clean workspace..."
-                // sh "docker rm -f app"
-                // sh "docker rm -f ted-nginx"
                 sh "docker rmi -f ${IMAGE_REPO_NAME_FRONTEND}:${IMAGE_TAG}"
                 sh "docker rmi -f ${IMAGE_REPO_NAME_BACKEND}:${IMAGE_TAG}"
                 cleanWs()
             }
             failure {
-                emailext (
-                    subject: "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                    body: """<p>${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
-                            <p>Check console output at <a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a></p>""",
-                    recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']])
+                echo "Failure"
+                // emailext (
+                //     subject: "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                //     body: """<p>${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+                //             <p>Check console output at <a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a></p>""",
+                //     recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']])
+
+                    
                 // emailext body: '${DEFAULT_CONTENT}',
                 //     subject: '${DEFAULT_SUBJECT}',
                 //     to: '${DEFAULT_RECIPIENTS}',
