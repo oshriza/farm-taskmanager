@@ -15,11 +15,11 @@ pipeline {
         BRANCH_NAME = "${env.GIT_BRANCH}" // Release/1.1
         AWS_ACCOUNT_ID="644435390668"
         AWS_DEFAULT_REGION="us-east-2"
-        IMAGE_TAG="latest"
-        IMAGE_REPO_NAME_APP="oshri-portfolio-back"
-        REPOSITORY_URI_APP="https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_APP}"
-        IMAGE_REPO_NAME_NGINX="oshri-portfolio-front"
-        REPOSITORY_URI_NGINX="https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_NGINX}"
+        IMAGE_TAG="1.0.0"
+        IMAGE_REPO_NAME_BACKEND="oshri-portfolio-back"
+        REPOSITORY_URI_BACKEND="https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_BACKEND}"
+        IMAGE_REPO_NAME_FRONTEND="oshri-portfolio-front"
+        REPOSITORY_URI_FRONTEND="https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_FRONTEND}"
         COMMIT_MSG=sh(script: 'git log -1 | grep "#test"' , returnStatus: true)
     }
     stages {
@@ -44,25 +44,33 @@ pipeline {
                 sh "sleep 10"
                 sh "docker network connect jenkins_default front_container"
                 sh "e2e/test.sh front:80"
+                sh "docker-compose down"
             }
         }
         
-        // stage ("publish") {
-        //     when { expression {COMMIT_MSG == "0"}}
-        //     steps {
-        //         echo "Publish..."
-        //         script {
-        //             app=docker.build("${IMAGE_REPO_NAME_APP}")
-        //             docker.withRegistry("${REPOSITORY_URI_APP}", "ecr:us-east-2:aws.credentials") {
-        //                 app.push("${IMAGE_TAG}")
-        //             }
-        //             nginx=docker.build("${IMAGE_REPO_NAME_NGINX}", "-f ./Dockerfile.nginx .")
-        //             docker.withRegistry("${REPOSITORY_URI_NGINX}", "ecr:us-east-2:aws.credentials") {
-        //                 nginx.push("${IMAGE_TAG}")
-        //             }
-        //         }
-        //     }
-        // }
+        stage ("publish") {
+            when { expression {BRANCH_NAME == "main"}}
+            steps {
+                echo "Publish to ECR..."
+                script {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws.credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                        sh "docker tag ${IMAGE_REPO_NAME_BACKEND}:${IMAGE_TAG} ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
+                        sh "docker push ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
+
+                        sh "docker tag ${IMAGE_REPO_NAME_FRONTEND}:${IMAGE_TAG} ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
+                        sh "docker push ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
+                    }
+                    // app=docker.build("${IMAGE_REPO_NAME_BACKEND}")
+                    // docker.withRegistry("${REPOSITORY_URI_BACKEND}", "ecr:us-east-2:aws.credentials") {
+                    //     app.push("${IMAGE_TAG}")
+                    // }
+                    // nginx=docker.build("${IMAGE_REPO_NAME_FRONTEND}", "-f ./Dockerfile.nginx .")
+                    // docker.withRegistry("${REPOSITORY_URI_FRONTEND}", "ecr:us-east-2:aws.credentials") {
+                    //     nginx.push("${IMAGE_TAG}")
+                    }
+                }
+            }
+        }
         // stage ("Deploy") {
         //     when { expression {COMMIT_MSG == "0"}}
         //     steps {
@@ -98,11 +106,10 @@ pipeline {
         post {
             always {
                 echo "Deleting and clean workspace..."
-                sh "docker-compose down"
                 // sh "docker rm -f app"
                 // sh "docker rm -f ted-nginx"
-                sh "docker rmi -f ${IMAGE_REPO_NAME_NGINX}:${IMAGE_TAG}"
-                sh "docker rmi -f ${IMAGE_REPO_NAME_APP}:${IMAGE_TAG}"
+                sh "docker rmi -f ${IMAGE_REPO_NAME_FRONTEND}:${IMAGE_TAG}"
+                sh "docker rmi -f ${IMAGE_REPO_NAME_BACKEND}:${IMAGE_TAG}"
                 cleanWs()
             }
             failure {
