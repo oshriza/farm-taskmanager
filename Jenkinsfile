@@ -53,13 +53,13 @@ pipeline {
             steps {
                 echo "Publish to ECR..."
                 script {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws.credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                        sh "docker tag ${IMAGE_REPO_NAME_BACKEND}:${IMAGE_TAG} ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
-                        sh "docker push ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws.credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                            sh "docker tag ${IMAGE_REPO_NAME_BACKEND}:latest ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
+                            sh "docker push ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
 
-                        sh "docker tag ${IMAGE_REPO_NAME_FRONTEND}:${IMAGE_TAG} ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
-                        sh "docker push ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
-                    }
+                            sh "docker tag ${IMAGE_REPO_NAME_FRONTEND}:latest ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
+                            sh "docker push ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
+                        }
                     // app=docker.build("${IMAGE_REPO_NAME_BACKEND}")
                     // docker.withRegistry("${REPOSITORY_URI_BACKEND}", "ecr:us-east-2:aws.credentials") {
                     //     app.push("${IMAGE_TAG}")
@@ -102,7 +102,6 @@ pipeline {
         //     }
         // }
 
-    }
         post {
             always {
                 echo "Deleting and clean workspace..."
