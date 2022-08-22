@@ -42,6 +42,7 @@ pipeline {
                 echo 'TEST...'
                 sh "docker-compose up -d"
                 sh "sleep 10"
+                sh "docker network connect jenkins_default front_container"
                 sh "e2e/test.sh front:80"
             }
         }
