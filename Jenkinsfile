@@ -40,7 +40,7 @@ pipeline {
         stage ("test") {
             steps {
                 echo 'TEST...'
-                sh "docker-compose up"
+                sh "docker-compose up -d"
                 sh "sleep 10"
                 sh "e2e/test.sh front:80"
             }
@@ -96,7 +96,8 @@ pipeline {
     }
         post {
             always {
-                echo "Deleting containers..."
+                echo "Deleting and clean workspace..."
+                sh "docker-compose down"
                 // sh "docker rm -f app"
                 // sh "docker rm -f ted-nginx"
                 sh "docker rmi -f ${IMAGE_REPO_NAME_NGINX}:${IMAGE_TAG}"
