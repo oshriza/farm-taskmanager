@@ -134,7 +134,7 @@ pipeline {
             echo "Deleting and clean workspace..."
             sh "docker-compose down"
             script {
-                if (IMAGE_TAG != "none") {
+                if (BRANCH_NAME == "main" && COMMIT_MSG == "0") {
                     sh "docker rmi -f ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
                     sh "docker rmi -f ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
                 }
