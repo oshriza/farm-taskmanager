@@ -124,34 +124,35 @@ pipeline {
         //     }
         // }
 
-        post {
-            always {
-                echo "Deleting and clean workspace..."
-                sh "docker rmi -f ${IMAGE_REPO_NAME_FRONTEND}:${IMAGE_TAG}"
-                sh "docker rmi -f ${IMAGE_REPO_NAME_BACKEND}:${IMAGE_TAG}"
-                sh "docker rmi -f ${IMAGE_REPO_NAME_FRONTEND}:latest"
-                sh "docker rmi -f ${IMAGE_REPO_NAME_BACKEND}:latest"
-                cleanWs()
-            }
-            failure {
-                echo "Failure"
-                // emailext (
-                //     subject: "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                //     body: """<p>${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
-                //             <p>Check console output at <a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a></p>""",
-                //     recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']])
 
-                    
-                // emailext body: '${DEFAULT_CONTENT}',
-                //     subject: '${DEFAULT_SUBJECT}',
-                //     to: '${DEFAULT_RECIPIENTS}',
-                //     from: '${env.DEFAULT_FROM_EMAIL}'
-            }
-            success {
-                echo "Success"
-                // mail bcc: '', body: 'Success to deploy', cc: '', from: '', replyTo: '', subject: 'jenkins job', to: 'oshriza@gmail.com'
-            } 
-        }  
     }
+    post {
+        always {
+            echo "Deleting and clean workspace..."
+            sh "docker rmi -f ${IMAGE_REPO_NAME_FRONTEND}:${IMAGE_TAG}"
+            sh "docker rmi -f ${IMAGE_REPO_NAME_BACKEND}:${IMAGE_TAG}"
+            sh "docker rmi -f ${IMAGE_REPO_NAME_FRONTEND}:latest"
+            sh "docker rmi -f ${IMAGE_REPO_NAME_BACKEND}:latest"
+            cleanWs()
+        }
+        failure {
+            echo "Failure"
+            // emailext (
+            //     subject: "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+            //     body: """<p>${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+            //             <p>Check console output at <a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a></p>""",
+            //     recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']])
+
+                
+            // emailext body: '${DEFAULT_CONTENT}',
+            //     subject: '${DEFAULT_SUBJECT}',
+            //     to: '${DEFAULT_RECIPIENTS}',
+            //     from: '${env.DEFAULT_FROM_EMAIL}'
+        }
+        success {
+            echo "Success"
+            // mail bcc: '', body: 'Success to deploy', cc: '', from: '', replyTo: '', subject: 'jenkins job', to: 'oshriza@gmail.com'
+        } 
+    }  
 
 }
