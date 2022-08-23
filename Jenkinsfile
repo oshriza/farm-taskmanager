@@ -132,8 +132,12 @@ pipeline {
         always {
             echo "Deleting and clean workspace..."
             sh "docker-compose down"
-            sh "docker rmi -f ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
-            sh "docker rmi -f ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
+            script {
+                if (IMAGE_TAG) {
+                    sh "docker rmi -f ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
+                    sh "docker rmi -f ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
+                }
+            }
             sh "docker rmi -f ${IMAGE_REPO_NAME_FRONTEND}:latest"
             sh "docker rmi -f ${IMAGE_REPO_NAME_BACKEND}:latest"
             cleanWs()
