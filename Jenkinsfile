@@ -21,7 +21,7 @@ pipeline {
         REPOSITORY_URI_FRONTEND="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_FRONTEND}"
         COMMIT_MSG=sh(script: 'git log -1 | grep "#release"' , returnStatus: true)
         // IMAGE_TAG="1.0.0"
-        IMAGE_TAG = ""
+        IMAGE_TAG = "none"
     }
     stages {
         stage ("checkout") {
@@ -133,9 +133,8 @@ pipeline {
         always {
             echo "Deleting and clean workspace..."
             sh "docker-compose down"
-            sh "printenv"
             script {
-                if (env.IMAGE_TAG) {
+                if (IMAGE_TAG != "none") {
                     sh "docker rmi -f ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
                     sh "docker rmi -f ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
                 }
