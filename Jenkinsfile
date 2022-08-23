@@ -19,7 +19,7 @@ pipeline {
         REPOSITORY_URI_BACKEND="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_BACKEND}"
         IMAGE_REPO_NAME_FRONTEND="oshri-portfolio-front"
         REPOSITORY_URI_FRONTEND="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_FRONTEND}"
-        COMMIT_MSG=sh(script: 'git log -1 | grep "#test"' , returnStatus: true)
+        COMMIT_MSG=sh(script: 'git log -1 | grep "#release"' , returnStatus: true)
         // IMAGE_TAG="1.0.0"
     }
     stages {
@@ -43,28 +43,38 @@ pipeline {
                 sh "sleep 10"
                 sh "docker network connect jenkins_default front_container"
                 sh "e2e/test.sh front:80"
-                sh "docker-compose down"
             }
         }
+
+        stage('calc-tag') {
+            when { expression {BRANCH_NAME == "main" && COMMIT_MSG == "0"} }
+            steps {
+                script {
+                    sshagent(credentials: ['github.private.key']) {
+                        IMAGE_TAG = sh(script: "git tag --list | tail -1", returnStdout: true)
+                        echo "Last image tag: ${IMAGE_TAG}"
+                        if (IMAGE_TAG.isEmpty()) {
+                            IMAGE_TAG = "1.0.0"
+                        }
+                        else { // 1.1.1
+                            (major, minor, patch) = IMAGE_TAG.tokenize(".") // [1,1,1]
+                            patch = patch.toInteger() + 1 // 2
+                            echo "Increment to ${patch}"
+                            IMAGE_TAG = "${major}.${minor}.${patch}" // 1.1.2
+                            echo "the next tag for Release is: ${IMAGE_TAG}"
+                        }
+                    }
+                }
+            }
+        } 
         
         stage ("publish") {
-            when { expression {BRANCH_NAME == "main"}}
+            when { expression {BRANCH_NAME == "main" && COMMIT_MSG == "0"}}
             steps {
                 echo "Publish to ECR..."
                 script {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws.credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                            IMAGE_TAG = sh(script: "aws ecr describe-images --output json --repository-name oshri-portfolio-front --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[-1]' | jq . --raw-output | sort -r", returnStdout: true) 
-                            echo "Last image tag: ${IMAGE_TAG}"
-                            if (IMAGE_TAG.isEmpty()) {
-                                IMAGE_TAG = "1.0.0"
-                            }
-                            else { // 1.1.1
-                                (major, minor, patch) = IMAGE_TAG.tokenize(".") // [1,1,1]
-                                patch = patch.toInteger() + 1 // 2
-                                echo "Increment to ${patch}"
-                                IMAGE_TAG = "${major}.${minor}.${patch}" // 1.1.2
-                                echo "the next tag for Release is: ${IMAGE_TAG}"
-                            }
+                            // IMAGE_TAG = sh(script: "aws ecr describe-images --output json --repository-name oshri-portfolio-front --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[-1]' | jq . --raw-output | sort -r", returnStdout: true) 
                             sh "aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 644435390668.dkr.ecr.us-east-2.amazonaws.com"
                             sh "docker tag ${IMAGE_REPO_NAME_BACKEND}:latest ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
                             sh "docker push ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
@@ -72,21 +82,13 @@ pipeline {
                             sh "docker tag ${IMAGE_REPO_NAME_FRONTEND}:latest ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
                             sh "docker push ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
                         }
-                    // app=docker.build("${IMAGE_REPO_NAME_BACKEND}")
-                    // docker.withRegistry("${REPOSITORY_URI_BACKEND}", "ecr:us-east-2:aws.credentials") {
-                    //     app.push("${IMAGE_TAG}")
-                    // }
-                    // nginx=docker.build("${IMAGE_REPO_NAME_FRONTEND}", "-f ./Dockerfile.nginx .")
-                    // docker.withRegistry("${REPOSITORY_URI_FRONTEND}", "ecr:us-east-2:aws.credentials") {
-                    //     nginx.push("${IMAGE_TAG}")
-                    // }
                 }
             }
         }
         stage('tag-Release') {
-            when { expression {BRANCH_NAME == "main"} }
+            when { expression {BRANCH_NAME == "main" && COMMIT_MSG == "0"} }
             steps {
-                withCredentials([gitUsernamePassword(credentialsId: 'jenkins.gitlab.user', passwordVariable: 'password', usernameVariable: 'username')]) {
+                sshagent(credentials: ['github.private.key']) {
                     sh "git clean -f"
                     sh "git tag -a ${IMAGE_TAG} -m '${IMAGE_TAG}'"
                     sh "git push origin refs/tags/${IMAGE_TAG}"
@@ -129,8 +131,9 @@ pipeline {
     post {
         always {
             echo "Deleting and clean workspace..."
-            sh "docker rmi -f ${IMAGE_REPO_NAME_FRONTEND}:${IMAGE_TAG}"
-            sh "docker rmi -f ${IMAGE_REPO_NAME_BACKEND}:${IMAGE_TAG}"
+            sh "docker-compose down"
+            sh "docker rmi -f ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
+            sh "docker rmi -f ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
             sh "docker rmi -f ${IMAGE_REPO_NAME_FRONTEND}:latest"
             sh "docker rmi -f ${IMAGE_REPO_NAME_BACKEND}:latest"
             cleanWs()
