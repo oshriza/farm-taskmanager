@@ -50,6 +50,7 @@ pipeline {
             steps {
                 script {
                     sshagent(credentials: ['github.private.key']) {
+                        sh "git fetch --all --tags"
                         IMAGE_TAG = sh(script: "git tag | sort -V | tail -1", returnStdout: true)
                         echo "Last image tag: ${IMAGE_TAG}"
                         if (IMAGE_TAG.isEmpty()) {
