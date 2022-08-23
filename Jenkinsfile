@@ -20,8 +20,6 @@ pipeline {
         IMAGE_REPO_NAME_FRONTEND="oshri-portfolio-front"
         REPOSITORY_URI_FRONTEND="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME_FRONTEND}"
         COMMIT_MSG=sh(script: 'git log -1 | grep "#release"' , returnStatus: true)
-        // IMAGE_TAG="1.0.0"
-        IMAGE_TAG = "none"
     }
     stages {
         stage ("checkout") {
