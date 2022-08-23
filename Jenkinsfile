@@ -143,7 +143,7 @@ pipeline {
             cleanWs()
         }
         failure {
-            echo "Failure"
+            echo "Failuree"
             // emailext (
             //     subject: "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
             //     body: """<p>${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
