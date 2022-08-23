@@ -46,7 +46,7 @@ pipeline {
         }
 
         stage('calc-tag') {
-            when { expression {BRANCH_NAME == "main" && COMMIT_MSG == "0"} }
+            when { expression {BRANCH_NAME == "main"} }
             steps {
                 script {
                     sshagent(credentials: ['github.private.key']) {
@@ -68,7 +68,7 @@ pipeline {
         } 
         
         stage ("publish") {
-            when { expression {BRANCH_NAME == "main" && COMMIT_MSG == "0"}}
+            when { expression {BRANCH_NAME == "main"}}
             steps {
                 echo "Publish to ECR..."
                 script {
@@ -85,7 +85,7 @@ pipeline {
             }
         }
         stage('tag-Release') {
-            when { expression {BRANCH_NAME == "main" && COMMIT_MSG == "0"} }
+            when { expression {BRANCH_NAME == "main"} }
             steps {
                 sshagent(credentials: ['github.private.key']) {
                     sh "git clean -f"
@@ -132,7 +132,7 @@ pipeline {
             echo "Deleting and clean workspace..."
             sh "docker-compose down"
             script {
-                if (BRANCH_NAME == "main" && COMMIT_MSG == "0") {
+                if (BRANCH_NAME == "main") {
                     sh "docker rmi -f ${REPOSITORY_URI_FRONTEND}:${IMAGE_TAG}"
                     sh "docker rmi -f ${REPOSITORY_URI_BACKEND}:${IMAGE_TAG}"
                 }
