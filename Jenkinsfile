@@ -152,5 +152,6 @@ pipeline {
                 // mail bcc: '', body: 'Success to deploy', cc: '', from: '', replyTo: '', subject: 'jenkins job', to: 'oshriza@gmail.com'
             } 
         }  
+    }
 
 }
