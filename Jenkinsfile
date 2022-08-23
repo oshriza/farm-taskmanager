@@ -30,7 +30,6 @@ pipeline {
             }
         }
         stage ("build") {
-            // when { expression {BRANCH_NAME ==~ /Release(.+)/ || BRANCH_NAME ==~ /feature(.+)/}}
             steps {
                 echo 'BUILD...'
                 sh "docker-compose build"
@@ -54,7 +53,7 @@ pipeline {
                 echo "Publish to ECR..."
                 script {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws.credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                            IMAGE_TAG = sh(script: "aws ecr describe-images --output json --repository-name oshri-portfolio-back --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[-1]' | jq . --raw-output | sort -r", returnStdout: true) 
+                            IMAGE_TAG = sh(script: "aws ecr describe-images --output json --repository-name oshri-portfolio-front --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[-1]' | jq . --raw-output | sort -r", returnStdout: true) 
                             echo "Last image tag: ${IMAGE_TAG}"
                             if (IMAGE_TAG.isEmpty()) {
                                 IMAGE_TAG = "1.0.0"
@@ -80,10 +79,20 @@ pipeline {
                     // nginx=docker.build("${IMAGE_REPO_NAME_FRONTEND}", "-f ./Dockerfile.nginx .")
                     // docker.withRegistry("${REPOSITORY_URI_FRONTEND}", "ecr:us-east-2:aws.credentials") {
                     //     nginx.push("${IMAGE_TAG}")
-                    }
+                    // }
                 }
             }
         }
+        stage('tag-Release') {
+            when { expression {BRANCH_NAME == "main"} }
+            steps {
+                withCredentials([gitUsernamePassword(credentialsId: 'jenkins.gitlab.user', passwordVariable: 'password', usernameVariable: 'username')]) {
+                    sh "git clean -f"
+                    sh "git tag -a ${IMAGE_TAG} -m '${IMAGE_TAG}'"
+                    sh "git push origin refs/tags/${IMAGE_TAG}"
+                }
+            }
+        } 
         // stage ("Deploy") {
         //     when { expression {COMMIT_MSG == "0"}}
         //     steps {
