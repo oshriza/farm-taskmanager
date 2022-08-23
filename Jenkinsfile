@@ -50,7 +50,7 @@ pipeline {
             steps {
                 script {
                     sshagent(credentials: ['github.private.key']) {
-                        IMAGE_TAG = sh(script: "git tag --list | tail -1", returnStdout: true)
+                        IMAGE_TAG = sh(script: "git tag | sort -V | tail -1", returnStdout: true)
                         echo "Last image tag: ${IMAGE_TAG}"
                         if (IMAGE_TAG.isEmpty()) {
                             IMAGE_TAG = "1.0.0"
