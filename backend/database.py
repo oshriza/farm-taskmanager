@@ -3,8 +3,11 @@
 
 import motor.motor_asyncio
 from model import Todo
+import os
 
-client = motor.motor_asyncio.AsyncIOMotorClient('mongodb://mongodb:27017/')
+MONGODB_URI = os.environ['MONGODB_URI']
+client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URI)
+# client = motor.motor_asyncio.AsyncIOMotorClient('mongodb://mongodb:27017/')
 database = client.TodoList
 collection = database.todo
 
