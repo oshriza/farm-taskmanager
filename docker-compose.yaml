@@ -1,10 +1,10 @@
 version: "3"
 services:
-  app:
+  backend:
     build: .
     image: oshri-portfolio-back
-    hostname: app
-    container_name: app_container
+    hostname: backend
+    container_name: backend_container
     # ports:
     #   - 8000:8000
     depends_on:
@@ -13,7 +13,7 @@ services:
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/
     # volumes:
-    #   - /home/oshri/Desktop/Develeap/temp/FARM-Stack-Course/backend:/app/
+    #   - /home/oshri/Desktop/Develeap/temp/FARM-Stack-Course/backend:/backend/
   
   # frontend:
   #   build:
@@ -26,7 +26,7 @@ services:
   #     - 3000:3000
   #   restart: always
   #   # volumes:
-  #   #   - /home/oshri/Desktop/Develeap/temp/FARM-Stack-Course/frontend:/app/
+  #   #   - /home/oshri/Desktop/Develeap/temp/FARM-Stack-Course/frontend:/backend/
 
   mongodb:
     hostname: mongodb
