@@ -10,6 +10,8 @@ services:
     depends_on:
       - mongodb
     restart: always
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/
     # volumes:
     #   - /home/oshri/Desktop/Develeap/temp/FARM-Stack-Course/backend:/app/
   

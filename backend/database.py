@@ -5,7 +5,7 @@ import motor.motor_asyncio
 from model import Todo
 import os
 
-MONGODB_URI = os.environ['MONGODB_URI']
+MONGODB_URI = os.environ.get('MONGODB_URI')
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URI)
 # client = motor.motor_asyncio.AsyncIOMotorClient('mongodb://mongodb:27017/')
 database = client.TodoList
