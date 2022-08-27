@@ -94,38 +94,28 @@ pipeline {
                     sh "git push origin refs/tags/${IMAGE_TAG}"
                 }
             }
-        } 
-        // stage ("Deploy") {
-        //     when { expression {COMMIT_MSG == "0"}}
-        //     steps {
-        //         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws.credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-        //             echo "Deploy..."
-        //             sh """
-        //                 #!/bin/bash
-        //                 cd terraform
-        //                 terraform init
+        }
 
-        //                 branch_name=${env.GIT_BRANCH}
-        //                 branch_name=`echo \$branch_name | sed 's/\\//-/g'`
-        //                 if [ ${env.GIT_BRANCH} = 'master' ]; then
-        //                     terraform workspace select prod || terraform workspace new prod
-        //                 else 
-        //                     terraform workspace select \$branch_name || terraform workspace new \$branch_name
-        //                 fi
+        stage('deploy') {
+            when { expression { BRANCH == "main" } }
+            steps {
+                echo "DEPLOY..."
+                script {
+                    sshagent(credentials: ['github.private.key']) {
+                        sh  """ #!/bin/bash
+                            git clone git@github.com:oshriza/gitops-portfolio-taskmanager.git
+                            cd gitops-portfolio-taskmanager/
+                            yq -i '.appVersion = "${IMAGE_TAG}"' task-manager-app-layer3/Chart.yaml
+                            git commit -am "Updated new release to version: ${IMAGE_TAG}"
+                            git tag -a ${IMAGE_TAG} -m '${IMAGE_TAG}'
+                            git push origin refs/tags/${IMAGE_TAG}
+                            git push origin main
+                            """
 
-        //                 terraform apply --auto-approve
-
-        //                 echo 'E2E test...'
-        //                 tf_output_ip=`terraform output -json ec2_instance_ip | jq -r '.[0]'`
-        //                 sleep 10
-        //                 ../e2e/test.sh \$tf_output_ip
-                        
-        //             """
-        //         }
-
-        //     }
-        // }
-
+                    }
+                }
+            }
+        }
 
     }
     post {

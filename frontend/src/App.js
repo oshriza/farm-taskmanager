@@ -60,7 +60,7 @@ function App() {
       <TodoView todoList={todoList} />
       </div>
       </div>
-      <h6 className="card text-dark bg-warning py-1 mb-0" >Devealp bootcamp 14 &copy;</h6>
+      <h6 className="card text-dark bg-warning py-1 mb-0" >Develeap bootcamp 14 - Portfolio | Oshri Zafrani</h6>
     </div>
   );
 }
