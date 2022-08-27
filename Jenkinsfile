@@ -38,10 +38,19 @@ pipeline {
         stage ("test") {
             steps {
                 echo 'TEST...'
-                sh "docker-compose up -d"
-                sh "sleep 10"
-                sh "docker network connect jenkins_default front_container"
-                sh "e2e/test.sh front:80"
+                // sh "docker-compose up -d"
+                // sh "sleep 10"
+                sh  """ #!/bin/bash
+                    docker-compose up -d
+                    until $(curl --output /dev/null --silent --head --fail localhost/api/todo); do                                                                                                                   oshri@oshriza
+                        printf '.'
+                        sleep 5
+                    done
+                    docker network connect jenkins_default front_container
+                    e2e/test.sh front:80
+                    """
+                // sh "docker network connect jenkins_default front_container"
+                // sh "e2e/test.sh front:80"
             }
         }
 
