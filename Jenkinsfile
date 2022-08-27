@@ -40,7 +40,7 @@ pipeline {
                 echo 'TEST...'
                 // sh "docker-compose up -d"
                 // sh "sleep 10"
-                sh  """ #!/bin/bash
+                sh  """ #!/bin/sh
                     docker-compose up -d
                     until $(curl --output /dev/null --silent --head --fail localhost/api/todo); do                                                                                                                   oshri@oshriza
                         printf '.'
