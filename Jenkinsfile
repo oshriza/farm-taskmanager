@@ -24,7 +24,7 @@ pipeline {
     stages {
         stage ("checkout") {
             steps {
-                echo 'checkout...'
+                echo 'CHECKOUT...'
                 checkout scm
             }
         }
@@ -88,6 +88,7 @@ pipeline {
         stage('tag-Release') {
             when { expression {BRANCH_NAME == "main"} }
             steps {
+                echo "TAG RELEASE..."
                 sshagent(credentials: ['github.private.key']) {
                     sh "git clean -f"
                     sh "git tag -a ${IMAGE_TAG} -m '${IMAGE_TAG}'"
@@ -97,10 +98,9 @@ pipeline {
         }
 
         stage('deploy') {
-            when { expression { BRANCH == "main" } }
+            when { expression { BRANCH_NAME == "main" } }
             steps {
                 echo "DEPLOY..."
-                script {
                     sshagent(credentials: ['github.private.key']) {
                         sh  """ #!/bin/bash
                             git clone git@github.com:oshriza/gitops-portfolio-taskmanager.git
@@ -113,7 +113,8 @@ pipeline {
                             """
 
                     }
-                }
+                // script {
+                // }
             }
         }
 
