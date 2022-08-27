@@ -38,16 +38,10 @@ pipeline {
         stage ("test") {
             steps {
                 echo 'TEST...'
-                // sh "docker-compose up -d"
-                // sh "sleep 10"
-                sh  """ #!/bin/bash
-                    docker-compose up -d
-                    sleep 5
-                    docker network connect jenkins_default front_container
-                    e2e/test.sh front:80
-                    """
-                // sh "docker network connect jenkins_default front_container"
-                // sh "e2e/test.sh front:80"
+                sh "docker-compose up -d"
+                sh "sleep 1"
+                sh "docker network connect jenkins_default front_container"
+                sh "e2e/test.sh front:80"
             }
         }
 
