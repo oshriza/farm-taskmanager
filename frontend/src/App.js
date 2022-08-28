@@ -44,9 +44,9 @@ function App() {
   };
 
   return (
-    <div className="App list-group-item  justify-content-center align-items-center mx-auto" style={{"width":"400px", "backgroundColor":"white", "marginTop":"15px"}} >
-      <h1 className="card text-white bg-primary mb-1" styleName="max-width: 20rem;">Task Manager</h1>
-      <h6 className="card text-white bg-primary mb-3">FASTAPI - React - MongoDB</h6>
+    <div className="App list-group-item justify-content-center align-items-center mx-auto" style={{"width":"450px", "backgroundColor":"white", "marginTop":"20px"}} >
+      <h1 className="card text-dark mb-1" style={{"backgroundColor":"#FAAA34", "max-width": "20rem;"}} >Task Manager</h1>
+      <h6 className="card text-dark mb-3" style={{"backgroundColor":"#FAAA34"}}>FASTAPI - React - MongoDB</h6>
      <div className="card-body">
       <h5 className="card text-white bg-dark mb-3">Add Your Task</h5>
       <span className="card-text"> 
@@ -60,7 +60,7 @@ function App() {
       <TodoView todoList={todoList} />
       </div>
       </div>
-      <h6 className="card text-dark bg-warning py-1 mb-0" >Develeap bootcamp 14 - Portfolio | Oshri Zafrani</h6>
+      <h6 className="card text-dark py-1 mb-0" style={{"backgroundColor":"#FAAA34"}} >Develeap bootcamp 14 - Portfolio | Oshri Zafrani</h6>
     </div>
   );
 }

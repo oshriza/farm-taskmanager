@@ -5,8 +5,8 @@ services:
     image: oshri-portfolio-back
     hostname: backend
     container_name: backend_container
-    ports:
-      - 8000:8000
+    # ports:
+    #   - 8000:8000
     depends_on:
       - mongodb
     restart: always
