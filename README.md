@@ -3,6 +3,10 @@ This project is part of develeap portfolio and provides a Python FastApi as back
 The project includes Jenkinsfile for the CI and E2E test part of the CI.
 
 
+![CI CD](https://user-images.githubusercontent.com/24268589/187297362-3021d27b-eb97-4228-8123-d7762354a34b.png)
+
+
+
 ## Run and Test
 
 For easy usage, there is a Docker Compose to easy run and test the app.
@@ -12,3 +16,4 @@ docker-compose up --build
 ```bash
 check on: localhost
 ```
+
