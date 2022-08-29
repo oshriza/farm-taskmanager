@@ -6,7 +6,6 @@ The project includes Jenkinsfile for the CI and E2E test part of the CI.
 ![task-manager-screenshot](https://user-images.githubusercontent.com/24268589/187297936-29ad6d8c-572c-44da-b95b-27cbc82202c4.png)
 
 
-
 ## Run and Test
 
 For easy usage, there is a Docker Compose to easy run and test the app.
@@ -17,6 +16,12 @@ docker-compose up --build
 check on: localhost
 ```
 
+## CI&CD with Jenkins and ArgoCD
 
 ![CI CD](https://user-images.githubusercontent.com/24268589/187297362-3021d27b-eb97-4228-8123-d7762354a34b.png)
+
+
+# Related Repos
+[GitOps repo (for argoCD)](https://github.com/oshriza/gitops-portfolio-taskmanager)
+[Terraform Infra repo (eks cluster)](https://github.com/oshriza/infra-portfolio)
 
