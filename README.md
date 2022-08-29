@@ -22,6 +22,6 @@ check on: localhost
 
 
 # Related Repos
-[GitOps repo (for argoCD)](https://github.com/oshriza/gitops-portfolio-taskmanager)
+[GitOps repo (for argoCD)](https://github.com/oshriza/gitops-portfolio-taskmanager) <br>
 [Terraform Infra repo (eks cluster)](https://github.com/oshriza/infra-portfolio)
 
