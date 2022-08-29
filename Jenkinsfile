@@ -67,6 +67,7 @@ pipeline {
         } 
         
         stage ("publish") {
+            // TODO: Parallel stage
             when { expression {BRANCH_NAME == "main"}}
             steps {
                 echo "Publish to ECR..."
@@ -136,12 +137,6 @@ pipeline {
             //     body: """<p>${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
             //             <p>Check console output at <a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a></p>""",
             //     recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']])
-
-                
-            // emailext body: '${DEFAULT_CONTENT}',
-            //     subject: '${DEFAULT_SUBJECT}',
-            //     to: '${DEFAULT_RECIPIENTS}',
-            //     from: '${env.DEFAULT_FROM_EMAIL}'
         }
         success {
             echo "Success"

@@ -1,8 +1,9 @@
-FROM alpine:3.11 AS build-stage
+# FROM alpine:3.11 AS build-stage
+# nodejs base image with all the necessary packages (multi-stage: 20-30MB) 
+FROM node:14-alpine AS build-stage
 WORKDIR /app
-# TODO: need to change the base image - with nodejs and npm
 # add packages to the images
-RUN apk add nodejs && apk add npm
+# RUN apk add nodejs && apk add npm
 
 
 # copy the nexccery content from the local file to the image

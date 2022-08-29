@@ -1,6 +1,3 @@
-#  @bekbrace
-#  FARMSTACK Tutorial - Sunday 13.06.2021
-
 from fastapi import FastAPI, HTTPException
 # import uvicorn
 
