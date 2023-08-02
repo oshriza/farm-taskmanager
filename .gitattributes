@@ -1,1 +1,4 @@
-Jenkinsfile export-ignore
+*.dockerignore export-ignore
+.gitattributes export-ignore
+README.md export-ignore
+nginx export-ignore
